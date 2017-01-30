@@ -33,6 +33,7 @@ function makeLineChart() {
 
   // add focus circles
   var bisectDate = d3.bisector(function(d) { return d.reading_date; }).left,
+  	focusMin = svg.append("g").style("display", "none"),
   	focusMax = svg.append("g").style("display","none");
 
   // fetch and process the data
@@ -100,6 +101,12 @@ function makeLineChart() {
         .text(function(d) { return d.reading_type; });
 
     // append the circle at the intersection
+    focusMin.append("circle")
+    .attr("class", "y")
+    .style("fill", "none")
+    .style("stroke", "black")
+    .attr("r", 4);
+   
 		focusMax.append("circle")
 		    .attr("class", "y")
 		    .style("fill", "none")
@@ -112,10 +119,12 @@ function makeLineChart() {
 		    .attr("height", height)
 		    .style("fill", "none")
 		    .style("pointer-events", "all")
-		    .on("mouseover", function() {
+		    .on("mouseover", function() {	      
+		      focusMin.style("display", null);
 		      focusMax.style("display", null);
 		    })
 		    .on("mouseout", function() {
+		      focusMin.style("display", "none");
 		      focusMax.style("display", "none");
 		    })
 		    .on("mousemove", mousemove);
@@ -123,14 +132,22 @@ function makeLineChart() {
 		function mousemove() {
 		  var x0    = x.invert(d3.mouse(this)[0]),
 		      iMax  = bisectDate(readings[0].values, x0, 1),
+		      iMin  = bisectDate(readings[1].values, x0, 1),
 		      d0Max = readings[0].values[iMax - 1],
+		      d0Min = readings[1].values[iMin - 1],
 		      d1Max = readings[0].values[iMax],
+		      d1Min = readings[1].values[iMin],
 		      dMax = x0 - d0Max.reading_date > d1Max.reading_date - x0 ? d1Max: d0Max;
+		      dMin = x0 - d0Min.reading_date > d1Min.reading_date - x0 ? d1Min: d0Min;
 
 		  focusMax.select("circle.y")
 		      .attr("transform",
 		            "translate(" + x(dMax.reading_date) + "," +
 		                           y(dMax.reading_value) + ")");
+		  focusMin.select("circle.y")
+			    .attr("transform",
+			          "translate(" + x(dMin.reading_date) + "," +
+			                         y(dMin.reading_value) + ")");
 		}
   });
 }
