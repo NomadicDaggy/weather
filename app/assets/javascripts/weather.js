@@ -113,6 +113,19 @@ function makeLineChart() {
 		    .style("stroke", "black")
 		    .attr("r", 4);
 
+		// append a text label to the max temp line for the daily temp change
+		focusMax.append("text")
+		    .attr("class", "y1")
+		    .style("stroke", "white")
+		    .style("stroke-width", "3.5px")
+		    .style("opacity", 0.8)
+		    .attr("dx", 8)
+		    .attr("dy", "-.3em");
+		focusMax.append("text")
+		    .attr("class", "y2")
+		    .attr("dx", 8)
+		    .attr("dy", "-.3em");
+
 		// append a rectangle to capture mouse
 		svg.append("rect")
 		    .attr("width", width)
@@ -137,17 +150,29 @@ function makeLineChart() {
 		      d0Min = readings[1].values[iMin - 1],
 		      d1Max = readings[0].values[iMax],
 		      d1Min = readings[1].values[iMin],
-		      dMax = x0 - d0Max.reading_date > d1Max.reading_date - x0 ? d1Max: d0Max;
-		      dMin = x0 - d0Min.reading_date > d1Min.reading_date - x0 ? d1Min: d0Min;
+		      dMax  = x0 - d0Max.reading_date > d1Max.reading_date - x0 ? d1Max: d0Max,
+		      dMin  = x0 - d0Min.reading_date > d1Min.reading_date - x0 ? d1Min: d0Min,
+		      delta = (dMax.reading_value - dMin.reading_value).toFixed(1);
 
 		  focusMax.select("circle.y")
 		      .attr("transform",
 		            "translate(" + x(dMax.reading_date) + "," +
 		                           y(dMax.reading_value) + ")");
+		      
 		  focusMin.select("circle.y")
 			    .attr("transform",
 			          "translate(" + x(dMin.reading_date) + "," +
 			                         y(dMin.reading_value) + ")");
+			focusMax.select("text.y1")
+			    .text(delta + '°')
+			    .attr("transform",
+			          "translate(" + x(dMax.reading_date) + "," +
+			                         y(dMax.reading_value) + ")");
+			focusMax.select("text.y2")
+			    .text(delta + '°')
+			    .attr("transform",
+			          "translate(" + x(dMax.reading_date) + "," +
+			                         y(dMax.reading_value) + ")");
 		}
   });
 }
